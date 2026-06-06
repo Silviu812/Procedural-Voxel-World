@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2750699359769267842}
   - component: {fileID: -3764857191090346636}
   - component: {fileID: -8580776420590459055}
+  - component: {fileID: 4191628104747295241}
   m_Layer: 0
   m_Name: Chunk
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 3285794062650878832}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.96578, y: -0, z: 1.96578}
+  m_LocalPosition: {x: -90.03862, y: 0, z: 611.1068}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -103,4 +104,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86b7b61f1959b0e479afada1591368be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChunkRenderer
-  blockData: {fileID: 11400000, guid: 1d857501cd7e7564ca66e874e130f350, type: 2}
+  voxelData: {fileID: 11400000, guid: 1d857501cd7e7564ca66e874e130f350, type: 2}
+--- !u!64 &4191628104747295241
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3285794062650878832}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}

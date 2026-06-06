@@ -8,7 +8,28 @@ public static class ChunkMeshBuilder
         List<Vector3> vertices,
         List<int> triangles,
         List<Vector2> uvs,
-        VoxelDataSO blockData)
+        VoxelDataSO blockData,
+        bool includeWater)
+    {
+        BuildMesh(
+            chunk,
+            vertices,
+            triangles,
+            uvs,
+            blockData,
+            includeWater,
+            null
+        );
+    }
+
+    public static void BuildMesh(
+        ChunkVirtual chunk,
+        List<Vector3> vertices,
+        List<int> triangles,
+        List<Vector2> uvs,
+        VoxelDataSO blockData,
+        bool includeWater,
+        World world)
     {
         for (int x = 0; x < chunk.chunkSizeX; x++)
         {
@@ -21,6 +42,9 @@ public static class ChunkMeshBuilder
                     if (voxelType == VoxelType.Air)
                         continue;
 
+                    if (!includeWater && voxelType == VoxelType.Water)
+                        continue;
+
                     Vector3Int voxelPosInt = new Vector3Int(x, y, z);
                     Vector3 voxelPos = new Vector3(x, y, z);
 
@@ -29,15 +53,25 @@ public static class ChunkMeshBuilder
                         Vector3Int neighbour =
                             voxelPosInt + VoxelData.faceChecks[face];
 
-                        bool neighbourIsAir =
-                            !chunk.IsInside(neighbour.x, neighbour.y, neighbour.z) ||
-                            chunk.GetVoxel(neighbour.x, neighbour.y, neighbour.z) == VoxelType.Air;
+                        bool shouldDrawFace = ShouldDrawFace(
+                            chunk,
+                            neighbour,
+                            voxelType,
+                            includeWater,
+                            world
+                        );
 
-                        if (!neighbourIsAir)
+                        if (!shouldDrawFace)
                             continue;
 
-                        Vector2Int tile = GetTileForFace(voxelType, face, blockData);
-                        Vector2[] faceUvs = GetFaceUVs(tile, blockData.atlasColumns, blockData.atlasRows);
+                        Vector2Int tile =
+                            GetTileForFace(voxelType, face, blockData);
+
+                        Vector2[] faceUvs = GetFaceUVs(
+                            tile,
+                            blockData.atlasColumns,
+                            blockData.atlasRows
+                        );
 
                         for (int i = 0; i < 6; i++)
                         {
@@ -56,20 +90,79 @@ public static class ChunkMeshBuilder
         }
     }
 
-    private static Vector2Int GetTileForFace(VoxelType voxelType, int face, VoxelDataSO blockData)
+    private static bool ShouldDrawFace(
+        ChunkVirtual chunk,
+        Vector3Int neighbour,
+        VoxelType currentType,
+        bool includeWater,
+        World world)
+    {
+        VoxelType neighbourType;
+
+        if (chunk.IsInside(neighbour.x, neighbour.y, neighbour.z))
+        {
+            neighbourType = chunk.GetVoxel(
+                neighbour.x,
+                neighbour.y,
+                neighbour.z
+            );
+        }
+        else
+        {
+            if (world == null)
+                return true;
+
+            Vector3Int neighbourWorldPosition =
+                chunk.worldPosition + neighbour;
+
+            if (!world.TryGetVoxelType(neighbourWorldPosition, out neighbourType))
+                return true;
+        }
+
+        if (neighbourType == VoxelType.Air)
+            return true;
+
+        if (!includeWater && neighbourType == VoxelType.Water)
+            return true;
+
+        if (includeWater)
+        {
+            if (currentType != VoxelType.Water &&
+                neighbourType == VoxelType.Water)
+            {
+                return true;
+            }
+
+            if (currentType == VoxelType.Water &&
+                neighbourType != VoxelType.Water)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static Vector2Int GetTileForFace(
+        VoxelType voxelType,
+        int face,
+        VoxelDataSO blockData)
     {
         BlockTextureData data = blockData.GetBlockData(voxelType);
 
-        if (face == 2) // Top
+        if (face == 2)
             return data.top;
 
-        if (face == 3) // Bottom
+        if (face == 3)
             return data.bottom;
 
         return data.side;
     }
 
-    private static Vector2[] GetFaceUVs(Vector2Int tilePosition, int atlasColumns, int atlasRows)
+    private static Vector2[] GetFaceUVs(
+        Vector2Int tilePosition,
+        int atlasColumns,
+        int atlasRows)
     {
         Vector2[] faceUvs = new Vector2[6];
 

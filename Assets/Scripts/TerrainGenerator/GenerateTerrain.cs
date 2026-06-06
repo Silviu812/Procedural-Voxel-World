@@ -2,90 +2,99 @@ using UnityEngine;
 
 public class GenerateTerrain : MonoBehaviour
 {
-    [Header("Height Settings")]
-    public int baseHeight = 10;
-    public int heightAmplitude = 90;
+    [Tooltip("The component that calculates the surface height.")]
+    public BaseAlgo baseAlgo;
 
-    [Header("Noise Settings")]
-    public float frequency = 0.01f;
-    public int octaves = 6;
-    public float persistence = 0.55f;
-    public float lacunarity = 2f;
+    [Header("Water And Beach")]
+    [Tooltip("All empty blocks at or below this height become water.")]
+    [Min(0)]
+    public int waterLevel = 23;
 
-    [Header("Seed")]
-    public int seed = 12345;
+    [Tooltip("Ground this many blocks above water is sand instead of grass.")]
+    [Range(0, 8)]
+    public int beachHeight = 1;
 
-    private Vector2 seedOffset;
+    [Header("Ground Layers")]
+    [Tooltip("Number of dirt or sand blocks below the visible surface.")]
+    [Range(1, 12)]
+    public int soilDepth = 4;
 
-    private void Awake()
-    {
-        System.Random random = new System.Random(seed);
-
-        seedOffset = new Vector2(
-            random.Next(-100000, 100000),
-            random.Next(-100000, 100000)
-        );
-    }
+    public TreeSpawner treeSpawner;
+    public StoneHandler stoneHandler;
 
     public void GenerateChunk(ChunkVirtual chunk)
     {
+        if (baseAlgo == null)
+        {
+            Debug.LogError("GenerateTerrain needs a BaseAlgo reference in the Inspector.");
+            return;
+        }
+
         for (int x = 0; x < chunk.chunkSizeX; x++)
         {
             for (int z = 0; z < chunk.chunkSizeZ; z++)
             {
                 int worldX = chunk.worldPosition.x + x;
                 int worldZ = chunk.worldPosition.z + z;
+                int surfaceHeight = baseAlgo.GetSurfaceHeight(worldX, worldZ);
+                surfaceHeight = Mathf.Clamp(surfaceHeight, 0, chunk.chunkSizeY - 1);
 
-                float noise = OctavePerlin(worldX, worldZ);
+                int isMountain = baseAlgo.CheckMountain(worldX, worldZ);
 
-                int surfaceHeight = baseHeight + Mathf.FloorToInt(noise * heightAmplitude);
-
-                for (int y = 0; y < chunk.chunkSizeY; y++)
+                if (isMountain > 0)
                 {
-                    if (y > surfaceHeight)
+                    for (int y = 0; y < chunk.chunkSizeY; y++)
                     {
-                        chunk.SetVoxel(x, y, z, VoxelType.Air);
+                        chunk.SetVoxel(x, y, z, GetVoxelMountain(y, surfaceHeight));
                     }
-                    else if (y == surfaceHeight)
+                }
+                else
+                {
+                    for (int y = 0; y < chunk.chunkSizeY; y++)
                     {
-                        chunk.SetVoxel(x, y, z, VoxelType.Grass);
-                    }
-                    else if (y >= surfaceHeight - 4)
-                    {
-                        chunk.SetVoxel(x, y, z, VoxelType.Dirt);
-                    }
-                    else
-                    {
-                        chunk.SetVoxel(x, y, z, VoxelType.Stone);
+                        chunk.SetVoxel(x, y, z, GetVoxel(y, surfaceHeight));
                     }
                 }
             }
         }
+        treeSpawner.SpawnTrees(chunk);
     }
 
-    private float OctavePerlin(float x, float z)
+    private VoxelType GetVoxel(int y, int surfaceHeight)
     {
-        float total = 0f;
+        if (y == 0) return VoxelType.Bedrock;
+        if (y > surfaceHeight)
+            return y <= waterLevel ? VoxelType.Water : VoxelType.Air;
 
-        float amplitude = 1f;
-        float currentFrequency = frequency;
+        bool isBeach = surfaceHeight <= waterLevel + beachHeight;
 
-        float maxValue = 0f;
+        if (y == surfaceHeight)
+            return isBeach ? VoxelType.Sand : VoxelType.Grass;
 
-        for (int i = 0; i < octaves; i++)
-        {
-            float sampleX = x * currentFrequency + seedOffset.x;
-            float sampleZ = z * currentFrequency + seedOffset.y;
+        int depthBelowSurface = surfaceHeight - y;
+        if (depthBelowSurface <= soilDepth)
+            return isBeach ? VoxelType.Sand : VoxelType.Dirt;
 
-            float noise = Mathf.PerlinNoise(sampleX, sampleZ);
+        return stoneHandler.StoneHandlerSpawner();
+    }
+    private VoxelType GetVoxelMountain(int y, int surfaceHeight)
+    {
+        if (y == 0) return VoxelType.Bedrock;
+        if (y > surfaceHeight)
+            return y <= waterLevel ? VoxelType.Water : VoxelType.Air;
 
-            total += noise * amplitude;
-            maxValue += amplitude;
+        bool isBeach = surfaceHeight <= waterLevel + beachHeight;
 
-            amplitude *= persistence;
-            currentFrequency *= lacunarity;
-        }
+        if (y == surfaceHeight)
+            return isBeach ? VoxelType.Sand : stoneHandler.StoneHandlerSpawner();
 
-        return total / maxValue;
+        int depthBelowSurface = surfaceHeight - y;
+        if (depthBelowSurface <= soilDepth)
+            return isBeach ? VoxelType.Sand : stoneHandler.StoneHandlerSpawner();
+
+        if (y > baseAlgo.MaxHeight - 20)
+            return VoxelType.Snow;
+
+        return stoneHandler.StoneHandlerSpawner();
     }
 }

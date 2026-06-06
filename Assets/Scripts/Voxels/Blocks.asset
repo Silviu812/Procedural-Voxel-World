@@ -9,24 +9,84 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae231c5140db3164dbfc8838f784774f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1c5c2c1bd03e0d241aef2edbb1576630, type: 3}
   m_Name: Blocks
   m_EditorClassIdentifier: Assembly-CSharp::VoxelDataSO
   atlasColumns: 9
   atlasRows: 10
   blocks:
   - voxelType: 0
-    top: {x: 9, y: 0}
-    bottom: {x: 9, y: 0}
-    side: {x: 9, y: 0}
+    top: {x: 9, y: 9}
+    bottom: {x: 9, y: 9}
+    side: {x: 9, y: 9}
     isSolid: 0
   - voxelType: 1
     top: {x: 5, y: 1}
     bottom: {x: 7, y: 5}
     side: {x: 7, y: 4}
-    isSolid: 0
+    isSolid: 1
   - voxelType: 2
     top: {x: 7, y: 5}
     bottom: {x: 7, y: 5}
     side: {x: 7, y: 5}
+    isSolid: 1
+  - voxelType: 3
+    top: {x: 3, y: 4}
+    bottom: {x: 3, y: 4}
+    side: {x: 3, y: 4}
+    isSolid: 1
+  - voxelType: 4
+    top: {x: 3, y: 6}
+    bottom: {x: 3, y: 6}
+    side: {x: 3, y: 6}
+    isSolid: 1
+  - voxelType: 5
+    top: {x: 8, y: 5}
+    bottom: {x: 8, y: 5}
+    side: {x: 8, y: 5}
     isSolid: 0
+  - voxelType: 6
+    top: {x: 0, y: 9}
+    bottom: {x: 0, y: 9}
+    side: {x: 1, y: 0}
+    isSolid: 1
+  - voxelType: 7
+    top: {x: 4, y: 8}
+    bottom: {x: 4, y: 8}
+    side: {x: 4, y: 8}
+    isSolid: 0
+  - voxelType: 8
+    top: {x: 3, y: 5}
+    bottom: {x: 3, y: 5}
+    side: {x: 3, y: 5}
+    isSolid: 1
+  - voxelType: 9
+    top: {x: 3, y: 1}
+    bottom: {x: 3, y: 1}
+    side: {x: 3, y: 1}
+    isSolid: 1
+  - voxelType: 10
+    top: {x: 3, y: 3}
+    bottom: {x: 3, y: 3}
+    side: {x: 3, y: 3}
+    isSolid: 1
+  - voxelType: 11
+    top: {x: 2, y: 6}
+    bottom: {x: 2, y: 6}
+    side: {x: 2, y: 6}
+    isSolid: 1
+  - voxelType: 12
+    top: {x: 2, y: 9}
+    bottom: {x: 2, y: 9}
+    side: {x: 2, y: 9}
+    isSolid: 1
+  - voxelType: 13
+    top: {x: 2, y: 3}
+    bottom: {x: 2, y: 3}
+    side: {x: 2, y: 3}
+    isSolid: 1
+  - voxelType: 14
+    top: {x: 5, y: 7}
+    bottom: {x: 5, y: 7}
+    side: {x: 5, y: 7}
+    isSolid: 1
